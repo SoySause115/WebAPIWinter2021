@@ -1,12 +1,19 @@
 const { Console } = require('console')
 const { Socket } = require('dgram')
 var express = require('express')
+var mongoose = require('mongoose')
 const { Server } = require('http')
 var app = express()
 var serv = require('http').Server(app)
 var io = require('socket.io')(serv, {})
 //debugger
 var debug = true
+
+//local files
+require('./db')
+require('./models/Player')
+
+var PlayerData = mongoose.model('player')
 
 app.get('/', function(request, response) {
     response.sendFile(__dirname + '/client/index.html')
@@ -144,7 +151,8 @@ Player.update = function() {
         pack.push({
             x:player.x,
             y:player.y,
-            number:player.number
+            number:player.number,
+            id:player.id
         })
     }
 
@@ -208,6 +216,38 @@ Bullet.update = function() {
     return pack
 }
 
+//user collection
+var Players = {
+    "Mat":"123",
+    "Rob":"asd",
+    "Ron":"321",
+    "Jay":"ewq"
+}
+
+var isPasswordValid = function(data, cb) {
+    //return Players[data.username] === data.password
+    PlayerData.findOne({username:data.username}, function(err, username) {
+        cb(data.password == username.password)
+    })
+}
+
+var isUsernameTaken = function(data, cb) {
+    //return Players[data.username]
+
+    PlayerData.findOne({username:data.username}, function(err, username) {
+        if (username == null) {
+            cb(false)
+        } else {
+            cb(true)
+        }
+    })
+}
+
+var addUser = function (data) {
+    //Players[data.username] = data.password
+
+    new PlayerData(data).save()
+}
 
 io.sockets.on('connection', function(socket){
     console.log("Socket connected")
@@ -220,11 +260,66 @@ io.sockets.on('connection', function(socket){
     //add something to socket list
     SocketList[socket.id] = socket
     Player.onConnect(socket)
+    //send the id to the client
+    socket.emit('connected', socket.id)
 
     //disconnection event
     socket.on('disconnect', function() {
         delete SocketList[socket.id]
         Player.onDisconnect(socket)
+    })
+
+    //disconnection event
+    socket.on('signIn', function(data) {
+        /*
+        if (isPasswordValid(data)) {
+            Player.onConnect(socket)
+            //send the id to the client
+            socket.emit('connected', socket.id)
+            socket.emit('signInResponse', {
+                success: true
+            })
+        } else {
+            socket.emit('signInResponse', {
+                success: false
+            })
+        }
+        */
+
+        isPasswordValid(data, function(res) {
+            if (res) {
+                Player.onConnect(socket)
+                //send the id to the client
+                socket.emit('connected', socket.id)
+                socket.emit('signInResponse', { success: true })
+            } else {
+                socket.emit('signInResponse', { success: false })
+            }
+        })
+    })
+
+    socket.on('signUp', function(data) {
+        /*
+        if (isUsernameTaken(data)) {
+            socket.emit('signUpResponse', {
+                success: false
+            })
+        } else {
+            addUser(data)
+            socket.emit('signUpResponse', {
+                success: true
+            })
+        }
+        */
+
+        isUsernameTaken(data, function(res) {
+            if (res) {
+                socket.emit('signUpResponse', { success: false })
+            } else {
+                addUser(data)
+                socket.emit('signUpResponse', { success: true })
+            }
+        })
     })
 
     //handling chat event
