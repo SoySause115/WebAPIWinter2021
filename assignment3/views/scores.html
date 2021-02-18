@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asteroid Avoidance</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="container">
+        <h1>High Score List</h1>
+        <nav>
+            <a href="index.html">Play Game</a>
+            <a href="#">High Score List</a>
+        </nav>
+        <script>
+            fetch('/getData').then(function(scores){
+                scores.json().then(function(thescores){
+                    console.log(thescores)
+                    for(let score of thescores.score){
+                        var scoreElement = document.createElement('p')
+                        scoreElement.innerHTML = 'Name: ' + score.name + " - Score: " + score.score
+                        //displays the information from the database into the created paragraph tag
+                        document.getElementById('container').appendChild(scoreElement)
+                    }
+                })
+            })
+        </script>
+    </div>
+</body>
+</html>
