@@ -27,12 +27,11 @@ function randomRange(high, low) {
 
 var PlayerData = mongoose.model('player')
 
-//file communication
 app.get('/', function (req, res) {
     res.sendFile(__dirname + '/client/index.html')
 })
 
-//server side communication
+// server side communication
 app.use('/client', express.static(__dirname + '/client'))
 serv.listen(3000, function () {
     console.log("Connected on localhost 3000")
@@ -40,7 +39,6 @@ serv.listen(3000, function () {
 
 var SocketList = {}
 
-// class for a gameobject
 var GameObject = function () {
     var self = {
         x: 400,
@@ -114,11 +112,9 @@ var Player = function (id) {
 
 Player.list = {}
 
-// list of functions for player connection and movement
 Player.onConnect = function (socket) {
     playerCount++
     var player = new Player(socket.id)
-    // receive the player inputs
     socket.on('keypress', function (data) {
         if (data.inputId === 'up') {
             player.up = data.state
@@ -130,7 +126,6 @@ Player.onConnect = function (socket) {
             player.right = data.state
         }
         if (data.inputId === 'enter') {
-            // has the game already begun?
             if (isPlaying == false) {
                 gameStart()
             }
