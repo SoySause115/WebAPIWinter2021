@@ -5,10 +5,11 @@ var io = require("socket.io")(serv, {})
 var debug = true
 var mongoose = require('mongoose')
 
-//database and model
+// database and model
 require('./db')
 require('./models/Player')
 
+// variables
 var gravity = 1
 var asteroids = new Array()
 var numAsteroids = 10
@@ -21,12 +22,14 @@ var playerCount = 0
 
 //var isEndGame = false
 
+// random function
 function randomRange(high, low) {
     return Math.random() * (high - low) + low
 }
 
 var PlayerData = mongoose.model('player')
 
+// client side communication
 app.get('/', function (req, res) {
     res.sendFile(__dirname + '/client/index.html')
 })
@@ -39,6 +42,7 @@ serv.listen(3000, function () {
 
 var SocketList = {}
 
+// game object class
 var GameObject = function () {
     var self = {
         x: 400,
@@ -64,6 +68,7 @@ var GameObject = function () {
     return self
 }
 
+// player class
 var Player = function (id) {
     var self = GameObject()
     self.id = id
@@ -112,6 +117,7 @@ var Player = function (id) {
 
 Player.list = {}
 
+// on player connection
 Player.onConnect = function (socket) {
     playerCount++
     var player = new Player(socket.id)
@@ -134,11 +140,13 @@ Player.onConnect = function (socket) {
     })
 }
 
+// on disconnection
 Player.onDisconnect = function (socket) {
     playerCount--
     delete Player.list[socket.id]
 }
 
+// player updates
 Player.update = function () {
     var pack = []
     for (var i in Player.list) {
@@ -155,6 +163,7 @@ Player.update = function () {
     return pack
 }
 
+// asteroid class
 var Asteroid = function () {
     var self = GameObject()
     self.radius = randomRange(15, 2)
@@ -178,6 +187,7 @@ var Asteroid = function () {
 
 Asteroid.list = {}
 
+// asteroid updates
 Asteroid.update = function () {
     var pack = []
     for (var i in Asteroid.list) {
@@ -218,18 +228,21 @@ Asteroid.update = function () {
     return pack
 }
 
+// asteroid creation
 Asteroid.Create = function () {
     for (var i = 0; i < numAsteroids; i++) {
         asteroids[i] = new Asteroid()
     }
 }
 
+// if a password matches the database
 var isPasswordValid = function (data, cb) {
     PlayerData.findOne({ username: data.username }, function (err, username) {
         cb(data.password == username.password)
     })
 }
 
+// if there is already a name in the database
 var isUsernameTaken = function (data, cb) {
     PlayerData.findOne({ username: data.username }, function (err, username) {
         if (username == null) {
@@ -240,10 +253,12 @@ var isUsernameTaken = function (data, cb) {
     })
 }
 
+// adding a new user
 var addUser = function (data) {
     new PlayerData(data).save()
 }
 
+// starting the game
 function gameStart() {
     Asteroid.Create()
 }
@@ -302,6 +317,7 @@ io.sockets.on('connection', function (socket) {
     //socket.emit('endGame')
 })
 
+// detecting collision function
 function detectCollision(distance, calcDistance) {
     return distance < calcDistance
 }

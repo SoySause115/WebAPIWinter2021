@@ -22,16 +22,18 @@ socket.on("increaseScore")
     score++
 }
 
+// when the user signs in
 signDivSignIn.onclick = function () {
     socket.emit('signIn', { username: signDivUsername.value, password: signDivPassword.value })
 }
 
+// when the user signs up
 signDivSignUp.onclick = function () {
     socket.emit('signUp', { username: signDivUsername.value, password: signDivPassword.value })
 }
 
+// the response for the sign in
 socket.on("signInResponse", function (data) {
-
     if (data.success) {
         signDiv.style.display = "none"
         gameDiv.style.display = "inline-block"
@@ -42,6 +44,7 @@ socket.on("signInResponse", function (data) {
 
 })
 
+// the response for the sign up
 socket.on("signUpResponse", function (data) {
     if (data.success) {
         // log the user in
@@ -71,7 +74,7 @@ socket.on('connected', function (data) {
     console.log(clientId)
 })
 
-//event listeners for keypresses
+// event listeners for keypresses
 document.addEventListener('keydown', keyPressDown)
 document.addEventListener('keyup', keyPressUp)
 
@@ -99,6 +102,7 @@ function keyPressUp(e) {
     }
 }
 
+// getting the position from server
 socket.on('newPosition', function (data) {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
@@ -136,6 +140,7 @@ socket.on('newPosition', function (data) {
     }
 })
 
+// adding to the chat
 socket.on('addToChat', function (data) {
     chatText.innerHTML += `<div>${data}</div>`
 })
@@ -157,7 +162,8 @@ chatForm.onsubmit = function (e) {
     chatInput.value = ""
 }
 
-socket.on('endGame', function() {
-    console.log("got here")
-    window.location.href = "/client/index.html"
-})
+// if the game ends
+// socket.on('endGame', function() {
+//     console.log("got here")
+//     window.location.href = "/client/index.html"
+// })
