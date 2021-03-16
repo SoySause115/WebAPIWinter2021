@@ -1,17 +1,16 @@
 {
-  "name": "assignment2",
+  "name": "week3",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Jason Kozin",
+  "author": "",
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
-    "mongodb": "^3.6.3",
-    "mongoose": "^5.11.13",
-    "socket.io": "^3.1.1"
+    "mongoose": "^5.11.15",
+    "socket.io": "^3.1.0"
   }
 }
